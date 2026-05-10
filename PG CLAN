@@ -14,6 +14,64 @@ screenGui.Parent = playerGui
 
 local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
+-- ==================== WELCOME ANIMATION ====================
+local function playWelcomeAnimation()
+    local welcomeFrame = Instance.new("Frame")
+    welcomeFrame.Size = UDim2.new(0, 0, 0, 0)
+    welcomeFrame.Position = UDim2.new(0.5, 0, 0.38, 0)
+    welcomeFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 22)
+    welcomeFrame.BackgroundTransparency = 1
+    welcomeFrame.BorderSizePixel = 0
+    welcomeFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    welcomeFrame.Parent = screenGui
+
+    Instance.new("UICorner", welcomeFrame).CornerRadius = UDim.new(0, 20)
+
+    local welcomeText = Instance.new("TextLabel")
+    welcomeText.Size = UDim2.new(1, -60, 1, -60)
+    welcomeText.Position = UDim2.new(0, 30, 0, 30)
+    welcomeText.BackgroundTransparency = 1
+    welcomeText.Text = "Welcome, " .. player.DisplayName .. "\nto PG Clan Script"
+    welcomeText.TextColor3 = Color3.fromRGB(0, 170, 255)
+    welcomeText.TextScaled = true
+    welcomeText.Font = Enum.Font.GothamBold
+    welcomeText.TextTransparency = 1
+    welcomeText.Parent = welcomeFrame
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 3
+    stroke.Color = Color3.fromRGB(0, 200, 255)
+    stroke.Parent = welcomeText
+
+    local tweenIn = TweenService:Create(welcomeFrame, TweenInfo.new(0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0.58, 0, 0.28, 0),
+        BackgroundTransparency = 0.05
+    })
+    
+    local textIn = TweenService:Create(welcomeText, TweenInfo.new(0.55, Enum.EasingStyle.Quint), {
+        TextTransparency = 0
+    })
+
+    tweenIn:Play()
+    task.wait(0.25)
+    textIn:Play()
+
+    task.delay(2.8, function()
+        local tweenOut = TweenService:Create(welcomeFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {
+            Size = UDim2.new(0.4, 0, 0.18, 0),
+            BackgroundTransparency = 1
+        })
+        local textOut = TweenService:Create(welcomeText, TweenInfo.new(0.5), {TextTransparency = 1})
+        
+        tweenOut:Play()
+        textOut:Play()
+        
+        tweenOut.Completed:Connect(function()
+            welcomeFrame:Destroy()
+        end)
+    end)
+end
+
 -- Main Background
 local bg = Instance.new("Frame")
 bg.Name = "MainBackground"
@@ -35,7 +93,7 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 90
 gradient.Parent = bg
 
--- Title Bar
+-- Title Bar + Welcome Label (same as before)
 local titleBar = Instance.new("Frame")
 titleBar.Name = "TitleBar"
 titleBar.Size = UDim2.new(1, 0, 0, 60)
@@ -61,6 +119,23 @@ stroke.Color = Color3.fromRGB(0, 200, 255)
 stroke.Transparency = 0.3
 stroke.Parent = title
 
+local welcomeLabel = Instance.new("TextLabel")
+welcomeLabel.Size = UDim2.new(1, -90, 0, 30)
+welcomeLabel.Position = UDim2.new(0, 20, 0, 55)
+welcomeLabel.BackgroundTransparency = 1
+welcomeLabel.Text = "Welcome, " .. player.DisplayName
+welcomeLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+welcomeLabel.TextScaled = true
+welcomeLabel.Font = Enum.Font.GothamSemibold
+welcomeLabel.TextXAlignment = Enum.TextXAlignment.Left
+welcomeLabel.Parent = bg
+
+local welcomeStroke = Instance.new("UIStroke")
+welcomeStroke.Thickness = 1.2
+welcomeStroke.Color = Color3.fromRGB(0, 170, 255)
+welcomeStroke.Transparency = 0.4
+welcomeStroke.Parent = welcomeLabel
+
 -- Circle Toggle Button
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Name = "CircleToggle"
@@ -81,7 +156,6 @@ btnStroke.Color = Color3.fromRGB(255, 255, 255)
 btnStroke.Transparency = 0.5
 btnStroke.Parent = toggleBtn
 
--- Hover Effect
 toggleBtn.MouseEnter:Connect(function()
     TweenService:Create(toggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 52, 0, 52)}):Play()
 end)
@@ -90,11 +164,10 @@ toggleBtn.MouseLeave:Connect(function()
 end)
 
 -- ==================== TAB SYSTEM ====================
-
 local tabBar = Instance.new("Frame")
 tabBar.Name = "TabBar"
 tabBar.Size = UDim2.new(1, 0, 0, 50)
-tabBar.Position = UDim2.new(0, 0, 0, 60)
+tabBar.Position = UDim2.new(0, 0, 0, 85)
 tabBar.BackgroundColor3 = Color3.fromRGB(15, 15, 30)
 tabBar.BorderSizePixel = 0
 tabBar.Parent = bg
@@ -103,8 +176,8 @@ Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 0)
 
 local tabContainer = Instance.new("Frame")
 tabContainer.Name = "TabContainer"
-tabContainer.Size = UDim2.new(1, 0, 1, -110)
-tabContainer.Position = UDim2.new(0, 0, 0, 110)
+tabContainer.Size = UDim2.new(1, 0, 1, -145)
+tabContainer.Position = UDim2.new(0, 0, 0, 135)
 tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = bg
 
@@ -112,12 +185,12 @@ tabContainer.Parent = bg
 local mainTab     = Instance.new("Frame"); mainTab.Name = "MainTab";     mainTab.Size = UDim2.new(1,0,1,0); mainTab.BackgroundTransparency = 1; mainTab.Visible = true;  mainTab.Parent = tabContainer
 local proteinTab  = Instance.new("Frame"); proteinTab.Name = "ProteinTab"; proteinTab.Size = UDim2.new(1,0,1,0); proteinTab.BackgroundTransparency = 1; proteinTab.Visible = false; proteinTab.Parent = tabContainer
 local miscTab     = Instance.new("Frame"); miscTab.Name = "MiscTab";    miscTab.Size = UDim2.new(1,0,1,0); miscTab.BackgroundTransparency = 1; miscTab.Visible = false; miscTab.Parent = tabContainer
+local teleportTab = Instance.new("Frame"); teleportTab.Name = "TeleportTab"; teleportTab.Size = UDim2.new(1,0,1,0); teleportTab.BackgroundTransparency = 1; teleportTab.Visible = false; teleportTab.Parent = tabContainer
 local infoTab     = Instance.new("Frame"); infoTab.Name = "InfoTab";    infoTab.Size = UDim2.new(1,0,1,0); infoTab.BackgroundTransparency = 1; infoTab.Visible = false; infoTab.Parent = tabContainer
 
--- Tab Buttons
 local function createTabButton(text, position, targetTab)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.25, -8, 1, -10)
+    btn.Size = UDim2.new(0.2, -8, 1, -10)
     btn.Position = UDim2.new(position, 4, 0, 5)
     btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
     btn.Text = text
@@ -138,19 +211,20 @@ local function createTabButton(text, position, targetTab)
         mainTab.Visible = false
         proteinTab.Visible = false
         miscTab.Visible = false
+        teleportTab.Visible = false
         infoTab.Visible = false
         targetTab.Visible = true
     end)
     return btn
 end
 
-createTabButton("Main",    0,     mainTab)
-createTabButton("Protein", 0.25,  proteinTab)
-createTabButton("Misc",    0.5,   miscTab)
-createTabButton("Info",    0.75,  infoTab)
+createTabButton("Main",     0,     mainTab)
+createTabButton("Protein",  0.2,   proteinTab)
+createTabButton("Misc",     0.4,   miscTab)
+createTabButton("Teleport", 0.6,   teleportTab)
+createTabButton("Info",     0.8,   infoTab)
 
--- ==================== MAIN TAB ====================
-
+-- ==================== MAIN TAB (All Features Restored) ====================
 local autoStrength = false
 local autoPushup = false
 local autoGoldenEgg = false
@@ -175,11 +249,11 @@ local function createToggle(name, yPos, callback)
     return toggle
 end
 
-createToggle("Auto Strength", 0.08, function(btn)
+createToggle("Auto Strength (Lift)", 0.08, function(btn)
     autoStrength = not autoStrength
     if autoStrength then
         btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        btn.Text = "Auto Strength : ON"
+        btn.Text = "Auto Strength (Lift) : ON"
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         task.spawn(function()
             while autoStrength do
@@ -189,7 +263,7 @@ createToggle("Auto Strength", 0.08, function(btn)
         end)
     else
         btn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-        btn.Text = "Auto Strength : OFF"
+        btn.Text = "Auto Strength (Lift) : OFF"
         btn.TextColor3 = Color3.fromRGB(255, 100, 100)
     end
 end)
@@ -255,7 +329,6 @@ createToggle("Auto Rebirth", 0.44, function(btn)
 end)
 
 -- ==================== PROTEIN TAB ====================
-
 local function createBoostButton(name, price, args, yPos)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.85, 0, 0.105, 0)
@@ -289,9 +362,7 @@ createBoostButton("1.8x Strength - Atom Crunch", "4500", {"buy", "Atom Crunch", 
 createBoostButton("1.25x Shield - Chocolate Bar", "1500", {"buy", "Chocolate Bar 2", 1}, 0.22)
 createBoostButton("1.2x Shield - Chocolate Bar", "1250", {"buy", "Chocolate Bar 1", 1}, 0.36)
 
--- ==================== MISC & INFO ====================
-
--- Anti AFK
+-- ==================== MISC TAB - Anti AFK ====================
 local antiAFKEnabled = false
 local antiAFKConnection
 
@@ -327,21 +398,66 @@ antiAFKButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Info Tab
-local infoText = Instance.new("TextLabel")
-infoText.Size = UDim2.new(0.9, 0, 0.75, 0)
-infoText.Position = UDim2.new(0.05, 0, 0.12, 0)
-infoText.BackgroundTransparency = 1
-infoText.Text = "Welcome To KensHub Private Script!\n\n• Fast & Clean UI\n• Working Auto Farm\n• Boosts & More\n\nJoin our Discord for updates & more scripts!"
-infoText.TextColor3 = Color3.fromRGB(200, 220, 255)
-infoText.TextScaled = true
-infoText.TextWrapped = true
-infoText.Font = Enum.Font.GothamMedium
-infoText.TextYAlignment = Enum.TextYAlignment.Top
-infoText.Parent = infoTab
+-- ==================== TELEPORT TAB ====================
+local teleportSection = Instance.new("TextLabel")
+teleportSection.Size = UDim2.new(0.9, 0, 0, 40)
+teleportSection.Position = UDim2.new(0.05, 0, 0.05, 0)
+teleportSection.BackgroundTransparency = 1
+teleportSection.Text = "Teleport Locations"
+teleportSection.TextColor3 = Color3.fromRGB(0, 170, 255)
+teleportSection.TextScaled = true
+teleportSection.Font = Enum.Font.GothamBold
+teleportSection.Parent = teleportTab
+
+local function createTeleportButton(name, yPos, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.85, 0, 0.09, 0)
+    btn.Position = UDim2.new(0.075, 0, yPos, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextScaled = true
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Parent = teleportTab
+
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 1.5
+    stroke.Color = Color3.fromRGB(0, 170, 255)
+    stroke.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        callback()
+        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
+        task.delay(0.3, function()
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+        end)
+    end)
+end
+
+createTeleportButton("Inferno Island Area", 0.18, function()
+    pcall(function() ReplicatedStorage:WaitForChild("InfernoIslandTeleport"):FireServer("teleport") end)
+end)
+
+createTeleportButton("Nature Island", 0.30, function()
+    pcall(function() ReplicatedStorage:WaitForChild("NatureIslandTeleport"):FireServer("teleport") end)
+end)
+
+createTeleportButton("Frost Island Area", 0.42, function()
+    pcall(function() ReplicatedStorage:WaitForChild("FrostIslandTeleport"):FireServer("teleport") end)
+end)
+
+createTeleportButton("Spawn", 0.54, function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 5, 0)
+    end
+end)
+
+-- Call welcome animation
+playWelcomeAnimation()
 
 -- ==================== TOGGLE & DRAGGING ====================
-
 local isVisible = true
 local dragging = false
 local dragStart
@@ -385,7 +501,7 @@ end
 
 toggleBtn.MouseButton1Click:Connect(toggleGUI)
 
--- Dragging
+-- Dragging Code (unchanged)
 local function startDragging(obj)
     obj.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
