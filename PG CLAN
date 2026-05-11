@@ -1,533 +1,257 @@
--- KensHub - Animated Private Script - LocalScript
+-- KensHub - Mini Luna GUI (PG CLAN)
+local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua", true))()
+
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local VirtualUser = game:GetService("VirtualUser")
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "KensHub_PrivateScript"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
-
-local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-
--- ==================== WELCOME ANIMATION ====================
-local function playWelcomeAnimation()
-    local welcomeFrame = Instance.new("Frame")
-    welcomeFrame.Size = UDim2.new(0, 0, 0, 0)
-    welcomeFrame.Position = UDim2.new(0.5, 0, 0.38, 0)
-    welcomeFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 22)
-    welcomeFrame.BackgroundTransparency = 1
-    welcomeFrame.BorderSizePixel = 0
-    welcomeFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    welcomeFrame.Parent = screenGui
-
-    Instance.new("UICorner", welcomeFrame).CornerRadius = UDim.new(0, 20)
-
-    local welcomeText = Instance.new("TextLabel")
-    welcomeText.Size = UDim2.new(1, -60, 1, -60)
-    welcomeText.Position = UDim2.new(0, 30, 0, 30)
-    welcomeText.BackgroundTransparency = 1
-    welcomeText.Text = "Welcome, " .. player.DisplayName .. "\nto PG Clan Script"
-    welcomeText.TextColor3 = Color3.fromRGB(0, 170, 255)
-    welcomeText.TextScaled = true
-    welcomeText.Font = Enum.Font.GothamBold
-    welcomeText.TextTransparency = 1
-    welcomeText.Parent = welcomeFrame
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 3
-    stroke.Color = Color3.fromRGB(0, 200, 255)
-    stroke.Parent = welcomeText
-
-    local tweenIn = TweenService:Create(welcomeFrame, TweenInfo.new(0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.new(0.58, 0, 0.28, 0),
-        BackgroundTransparency = 0.05
-    })
-    
-    local textIn = TweenService:Create(welcomeText, TweenInfo.new(0.55, Enum.EasingStyle.Quint), {
-        TextTransparency = 0
-    })
-
-    tweenIn:Play()
-    task.wait(0.25)
-    textIn:Play()
-
-    task.delay(2.8, function()
-        local tweenOut = TweenService:Create(welcomeFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {
-            Size = UDim2.new(0.4, 0, 0.18, 0),
-            BackgroundTransparency = 1
-        })
-        local textOut = TweenService:Create(welcomeText, TweenInfo.new(0.5), {TextTransparency = 1})
-        
-        tweenOut:Play()
-        textOut:Play()
-        
-        tweenOut.Completed:Connect(function()
-            welcomeFrame:Destroy()
-        end)
-    end)
-end
-
--- Main Background
-local bg = Instance.new("Frame")
-bg.Name = "MainBackground"
-bg.Size = UDim2.new(0.65, 0, 0.78, 0)
-bg.Position = UDim2.new(0.175, 0, 0.11, 0)
-bg.BackgroundColor3 = Color3.fromRGB(18, 18, 28)
-bg.BorderSizePixel = 0
-bg.BackgroundTransparency = 1
-bg.Visible = true
-bg.Parent = screenGui
-
-Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 14)
-
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(28, 28, 48)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 12, 25))
+-- ==================== SETTINGS ====================
+local Settings = {
+	AutoSaveEnabled = true,
+	AutoSaveInterval = 180,
+	SavePosition = true,
+	
+	Defaults = {
+		Coins = 500,
+		Level = 1,
+		Exp = 0,
+	}
 }
-gradient.Rotation = 90
-gradient.Parent = bg
 
--- Title Bar + Welcome Label (same as before)
-local titleBar = Instance.new("Frame")
-titleBar.Name = "TitleBar"
-titleBar.Size = UDim2.new(1, 0, 0, 60)
-titleBar.BackgroundColor3 = Color3.fromRGB(10, 10, 22)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = bg
-
-Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 14)
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -90, 1, 0)
-title.Position = UDim2.new(0, 20, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "KensHub | Private Script"
-title.TextColor3 = Color3.fromRGB(0, 170, 255)
-title.TextScaled = true
-title.Font = Enum.Font.GothamBold
-title.Parent = titleBar
-
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2.5
-stroke.Color = Color3.fromRGB(0, 200, 255)
-stroke.Transparency = 0.3
-stroke.Parent = title
-
-local welcomeLabel = Instance.new("TextLabel")
-welcomeLabel.Size = UDim2.new(1, -90, 0, 30)
-welcomeLabel.Position = UDim2.new(0, 20, 0, 55)
-welcomeLabel.BackgroundTransparency = 1
-welcomeLabel.Text = "Welcome, " .. player.DisplayName
-welcomeLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-welcomeLabel.TextScaled = true
-welcomeLabel.Font = Enum.Font.GothamSemibold
-welcomeLabel.TextXAlignment = Enum.TextXAlignment.Left
-welcomeLabel.Parent = bg
-
-local welcomeStroke = Instance.new("UIStroke")
-welcomeStroke.Thickness = 1.2
-welcomeStroke.Color = Color3.fromRGB(0, 170, 255)
-welcomeStroke.Transparency = 0.4
-welcomeStroke.Parent = welcomeLabel
-
--- Circle Toggle Button
-local toggleBtn = Instance.new("TextButton")
-toggleBtn.Name = "CircleToggle"
-toggleBtn.Size = UDim2.new(0, 46, 0, 46)
-toggleBtn.Position = UDim2.new(1, -58, 0, 7)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-toggleBtn.Text = "K"
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.TextScaled = true
-toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.Parent = titleBar
-
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1, 0)
-
-local btnStroke = Instance.new("UIStroke")
-btnStroke.Thickness = 2.8
-btnStroke.Color = Color3.fromRGB(255, 255, 255)
-btnStroke.Transparency = 0.5
-btnStroke.Parent = toggleBtn
-
-toggleBtn.MouseEnter:Connect(function()
-    TweenService:Create(toggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 52, 0, 52)}):Play()
-end)
-toggleBtn.MouseLeave:Connect(function()
-    TweenService:Create(toggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 46, 0, 46)}):Play()
-end)
-
--- ==================== TAB SYSTEM ====================
-local tabBar = Instance.new("Frame")
-tabBar.Name = "TabBar"
-tabBar.Size = UDim2.new(1, 0, 0, 50)
-tabBar.Position = UDim2.new(0, 0, 0, 85)
-tabBar.BackgroundColor3 = Color3.fromRGB(15, 15, 30)
-tabBar.BorderSizePixel = 0
-tabBar.Parent = bg
-
-Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 0)
-
-local tabContainer = Instance.new("Frame")
-tabContainer.Name = "TabContainer"
-tabContainer.Size = UDim2.new(1, 0, 1, -145)
-tabContainer.Position = UDim2.new(0, 0, 0, 135)
-tabContainer.BackgroundTransparency = 1
-tabContainer.Parent = bg
-
--- Tab Frames
-local mainTab     = Instance.new("Frame"); mainTab.Name = "MainTab";     mainTab.Size = UDim2.new(1,0,1,0); mainTab.BackgroundTransparency = 1; mainTab.Visible = true;  mainTab.Parent = tabContainer
-local proteinTab  = Instance.new("Frame"); proteinTab.Name = "ProteinTab"; proteinTab.Size = UDim2.new(1,0,1,0); proteinTab.BackgroundTransparency = 1; proteinTab.Visible = false; proteinTab.Parent = tabContainer
-local miscTab     = Instance.new("Frame"); miscTab.Name = "MiscTab";    miscTab.Size = UDim2.new(1,0,1,0); miscTab.BackgroundTransparency = 1; miscTab.Visible = false; miscTab.Parent = tabContainer
-local teleportTab = Instance.new("Frame"); teleportTab.Name = "TeleportTab"; teleportTab.Size = UDim2.new(1,0,1,0); teleportTab.BackgroundTransparency = 1; teleportTab.Visible = false; teleportTab.Parent = tabContainer
-local infoTab     = Instance.new("Frame"); infoTab.Name = "InfoTab";    infoTab.Size = UDim2.new(1,0,1,0); infoTab.BackgroundTransparency = 1; infoTab.Visible = false; infoTab.Parent = tabContainer
-
-local function createTabButton(text, position, targetTab)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.2, -8, 1, -10)
-    btn.Position = UDim2.new(position, 4, 0, 5)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextScaled = true
-    btn.Font = Enum.Font.GothamSemibold
-    btn.Parent = tabBar
-
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 1.5
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.7
-    stroke.Parent = btn
-
-    btn.MouseButton1Click:Connect(function()
-        mainTab.Visible = false
-        proteinTab.Visible = false
-        miscTab.Visible = false
-        teleportTab.Visible = false
-        infoTab.Visible = false
-        targetTab.Visible = true
-    end)
-    return btn
+-- ==================== GREETINGS + TIME ====================
+local function GetTimeInfo()
+    local time = os.date("*t")
+    local hour = time.hour
+    local greeting = "Good Evening"
+    
+    if hour >= 5 and hour < 12 then
+        greeting = "Good Morning"
+    elseif hour >= 12 and hour < 17 then
+        greeting = "Good Afternoon"
+    end
+    
+    local dayName = os.date("%A")
+    local currentTime = os.date("%I:%M %p")
+    
+    return greeting, dayName, currentTime
 end
 
-createTabButton("Main",     0,     mainTab)
-createTabButton("Protein",  0.2,   proteinTab)
-createTabButton("Misc",     0.4,   miscTab)
-createTabButton("Teleport", 0.6,   teleportTab)
-createTabButton("Info",     0.8,   infoTab)
+local Greeting, CurrentDay, CurrentTime = GetTimeInfo()
 
--- ==================== MAIN TAB (All Features Restored) ====================
-local autoStrength = false
-local autoPushup = false
-local autoGoldenEgg = false
-local autoRebirth = false
-
-local function createToggle(name, yPos, callback)
-    local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0.85, 0, 0.09, 0)
-    toggle.Position = UDim2.new(0.075, 0, yPos, 0)
-    toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-    toggle.Text = name .. " : OFF"
-    toggle.TextColor3 = Color3.fromRGB(255, 100, 100)
-    toggle.TextScaled = true
-    toggle.Font = Enum.Font.GothamSemibold
-    toggle.Parent = mainTab
-
-    Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 12)
-
-    toggle.MouseButton1Click:Connect(function()
-        callback(toggle)
-    end)
-    return toggle
+local function GetWelcomeText()
+    local isNewPlayer = LocalPlayer.AccountAge < 7
+    return isNewPlayer and "Welcome" or "Welcome Back"
 end
 
-createToggle("Auto Strength (Lift)", 0.08, function(btn)
-    autoStrength = not autoStrength
-    if autoStrength then
-        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        btn.Text = "Auto Strength (Lift) : ON"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        task.spawn(function()
-            while autoStrength do
-                pcall(function() ReplicatedStorage:WaitForChild("addStrength"):FireServer() end)
-                task.wait(0.08)
-            end
-        end)
-    else
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-        btn.Text = "Auto Strength (Lift) : OFF"
-        btn.TextColor3 = Color3.fromRGB(255, 100, 100)
-    end
-end)
+local WelcomeText = GetWelcomeText()
+local DisplayName = LocalPlayer.DisplayName
+local HappyDay = "Happy " .. CurrentDay .. "!"
 
-createToggle("Auto Pushup", 0.20, function(btn)
-    autoPushup = not autoPushup
-    if autoPushup then
-        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        btn.Text = "Auto Pushup : ON"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        task.spawn(function()
-            while autoPushup do
-                pcall(function() ReplicatedStorage:WaitForChild("ShieldTrainingEvent"):FireServer() end)
-                task.wait(0.12)
-            end
-        end)
-    else
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-        btn.Text = "Auto Pushup : OFF"
-        btn.TextColor3 = Color3.fromRGB(255, 100, 100)
-    end
-end)
+-- ==================== CREATE WINDOW ====================
+local Window = Luna:CreateWindow({
+    Name = "KensHub PG CLAN",
+    Subtitle = Greeting .. " • " .. HappyDay .. " • " .. DisplayName,
+    LogoID = "6031097225",
+    LoadingEnabled = true,
+    LoadingTitle = WelcomeText .. ", " .. DisplayName,
+    LoadingSubtitle = HappyDay .. " • " .. Greeting .. " • " .. CurrentTime,
+})
 
-createToggle("Auto Open Golden Egg", 0.32, function(btn)
-    autoGoldenEgg = not autoGoldenEgg
-    if autoGoldenEgg then
-        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        btn.Text = "Auto Open Golden Egg : ON"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        task.spawn(function()
-            while autoGoldenEgg do
-                pcall(function() ReplicatedStorage:WaitForChild("PetEggEvent994"):FireServer("OpenEgg") end)
-                task.wait(0.7)
-            end
-        end)
-    else
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-        btn.Text = "Auto Open Golden Egg : OFF"
-        btn.TextColor3 = Color3.fromRGB(255, 100, 100)
-    end
-end)
+local Main = Window:CreateTab({ Name = "Main", Icon = "home" })
+local Tele = Window:CreateTab({ Name = "Teleport", Icon = "place" })
+local Boost = Window:CreateTab({ Name = "Boosts", Icon = "fitness_center" })
+local Misc = Window:CreateTab({ Name = "Misc", Icon = "build" })
+local DataTab = Window:CreateTab({ Name = "Data Save", Icon = "save" })
 
-createToggle("Auto Rebirth", 0.44, function(btn)
-    autoRebirth = not autoRebirth
-    if autoRebirth then
-        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        btn.Text = "Auto Rebirth : ON"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        task.spawn(function()
-            while autoRebirth do
-                pcall(function()
-                    local rEvents = ReplicatedStorage:WaitForChild("rEvents")
-                    rEvents:WaitForChild("rebirthEvent"):FireServer()
-                end)
-                task.wait(1.4)
-            end
-        end)
-    else
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-        btn.Text = "Auto Rebirth : OFF"
-        btn.TextColor3 = Color3.fromRGB(255, 100, 100)
-    end
-end)
+-- ====================== SETTINGS TAB ======================
+DataTab:CreateSection("Player Data Settings")
+DataTab:CreateToggle({ Name = "Enable Auto Save", CurrentValue = Settings.AutoSaveEnabled, Callback = function(s) Settings.AutoSaveEnabled = s end })
+DataTab:CreateSlider({ Name = "Auto Save Interval (seconds)", Range = {60, 600}, Increment = 30, CurrentValue = Settings.AutoSaveInterval, Callback = function(v) Settings.AutoSaveInterval = v end })
+DataTab:CreateToggle({ Name = "Save Position", CurrentValue = Settings.SavePosition, Callback = function(s) Settings.SavePosition = s end })
+DataTab:CreateButton({ Name = "Manual Save Data", Callback = function() Luna:Notification({Title = "Data Save", Content = "Manual save triggered", Duration = 3}) end })
 
--- ==================== PROTEIN TAB ====================
-local function createBoostButton(name, price, args, yPos)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.85, 0, 0.105, 0)
-    btn.Position = UDim2.new(0.075, 0, yPos, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-    btn.Text = name .. "  " .. price .. "🔮"
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextScaled = true
-    btn.Font = Enum.Font.GothamSemibold
-    btn.Parent = proteinTab
+-- ====================== MAIN TAB ======================
+Main:CreateSection("Auto Farm")
 
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
+Main:CreateToggle({ Name = "Auto Strength", CurrentValue = false, Callback = function(s) 
+    getgenv().AutoStrength = s
+    if s then task.spawn(function() 
+        while getgenv().AutoStrength do 
+            pcall(function() ReplicatedStorage:WaitForChild("addStrength"):FireServer() end) 
+            task.wait(0.05) 
+        end 
+    end) end
+end})
 
-    local boostStroke = Instance.new("UIStroke")
-    boostStroke.Thickness = 1.5
-    boostStroke.Color = Color3.fromRGB(0, 170, 255)
-    boostStroke.Parent = btn
+Main:CreateToggle({ Name = "Auto Pushup", CurrentValue = false, Callback = function(s) 
+    getgenv().AutoPushup = s
+    if s then task.spawn(function() 
+        while getgenv().AutoPushup do 
+            pcall(function() ReplicatedStorage:WaitForChild("ShieldTrainingEvent"):FireServer() end) 
+            task.wait(0.1) 
+        end 
+    end) end
+end})
 
-    btn.MouseButton1Click:Connect(function()
+Main:CreateToggle({ Name = "Auto Golden Egg", CurrentValue = false, Callback = function(s) 
+    getgenv().AutoGoldenEgg = s
+    if s then task.spawn(function() 
+        while getgenv().AutoGoldenEgg do 
+            pcall(function() ReplicatedStorage:WaitForChild("PetEggEvent994"):FireServer("OpenEgg") end) 
+            task.wait(0.7) 
+        end 
+    end) end
+end})
+
+Main:CreateToggle({ Name = "Auto Rebirth", CurrentValue = false, Callback = function(s) 
+    getgenv().AutoRebirth = s
+    if s then task.spawn(function() 
+        while getgenv().AutoRebirth do 
+            pcall(function() ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("rebirthEvent"):FireServer() end) 
+            task.wait(1.4) 
+        end 
+    end) end
+end})
+
+-- ====================== DUNGEON SECTION ======================
+Main:CreateSection("Dungeon")
+
+Main:CreateButton({ 
+    Name = "🟢 Enter Dungeon (Solo)", 
+    Callback = function()
         pcall(function()
-            ReplicatedStorage:WaitForChild("BuyBoostEvent"):FireServer(unpack(args))
+            ReplicatedStorage:WaitForChild("DungeonEnterEvent"):FireServer("Solo")
         end)
-        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        task.delay(0.4, function()
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-        end)
-    end)
-end
-
-createBoostButton("1.8x Strength - Atom Crunch", "4500", {"buy", "Atom Crunch", 1}, 0.08)
-createBoostButton("1.25x Shield - Chocolate Bar", "1500", {"buy", "Chocolate Bar 2", 1}, 0.22)
-createBoostButton("1.2x Shield - Chocolate Bar", "1250", {"buy", "Chocolate Bar 1", 1}, 0.36)
-
--- ==================== MISC TAB - Anti AFK ====================
-local antiAFKEnabled = false
-local antiAFKConnection
-
-local antiAFKButton = Instance.new("TextButton")
-antiAFKButton.Size = UDim2.new(0.6, 0, 0.12, 0)
-antiAFKButton.Position = UDim2.new(0.2, 0, 0.15, 0)
-antiAFKButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-antiAFKButton.Text = "Anti AFK : OFF"
-antiAFKButton.TextColor3 = Color3.fromRGB(255, 100, 100)
-antiAFKButton.TextScaled = true
-antiAFKButton.Font = Enum.Font.GothamSemibold
-antiAFKButton.Parent = miscTab
-
-Instance.new("UICorner", antiAFKButton).CornerRadius = UDim.new(0, 12)
-
-antiAFKButton.MouseButton1Click:Connect(function()
-    antiAFKEnabled = not antiAFKEnabled
-    if antiAFKEnabled then
-        antiAFKButton.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        antiAFKButton.Text = "Anti AFK : ON"
-        antiAFKButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        
-        local vu = game:GetService("VirtualUser")
-        antiAFKConnection = player.Idled:Connect(function()
-            vu:CaptureController()
-            vu:ClickButton2(Vector2.new())
-        end)
-    else
-        antiAFKButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-        antiAFKButton.Text = "Anti AFK : OFF"
-        antiAFKButton.TextColor3 = Color3.fromRGB(255, 100, 100)
-        if antiAFKConnection then antiAFKConnection:Disconnect() end
+        Luna:Notification({Title = "Dungeon", Content = "Entering Solo Dungeon...", Duration = 3})
     end
-end)
+})
 
--- ==================== TELEPORT TAB ====================
-local teleportSection = Instance.new("TextLabel")
-teleportSection.Size = UDim2.new(0.9, 0, 0, 40)
-teleportSection.Position = UDim2.new(0.05, 0, 0.05, 0)
-teleportSection.BackgroundTransparency = 1
-teleportSection.Text = "Teleport Locations"
-teleportSection.TextColor3 = Color3.fromRGB(0, 170, 255)
-teleportSection.TextScaled = true
-teleportSection.Font = Enum.Font.GothamBold
-teleportSection.Parent = teleportTab
-
-local function createTeleportButton(name, yPos, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.85, 0, 0.09, 0)
-    btn.Position = UDim2.new(0.075, 0, yPos, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextScaled = true
-    btn.Font = Enum.Font.GothamSemibold
-    btn.Parent = teleportTab
-
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 1.5
-    stroke.Color = Color3.fromRGB(0, 170, 255)
-    stroke.Parent = btn
-
-    btn.MouseButton1Click:Connect(function()
-        callback()
-        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-        task.delay(0.3, function()
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-        end)
-    end)
-end
-
-createTeleportButton("Inferno Island Area", 0.18, function()
-    pcall(function() ReplicatedStorage:WaitForChild("InfernoIslandTeleport"):FireServer("teleport") end)
-end)
-
-createTeleportButton("Nature Island", 0.30, function()
-    pcall(function() ReplicatedStorage:WaitForChild("NatureIslandTeleport"):FireServer("teleport") end)
-end)
-
-createTeleportButton("Frost Island Area", 0.42, function()
-    pcall(function() ReplicatedStorage:WaitForChild("FrostIslandTeleport"):FireServer("teleport") end)
-end)
-
-createTeleportButton("Spawn", 0.54, function()
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 5, 0)
-    end
-end)
-
--- Call welcome animation
-playWelcomeAnimation()
-
--- ==================== TOGGLE & DRAGGING ====================
-local isVisible = true
-local dragging = false
-local dragStart
-local startPos
-
-local function playIntroAnimation()
-    bg.Size = UDim2.new(0.3, 0, 0.3, 0)
-    bg.Position = UDim2.new(0.35, 0, 0.35, 0)
-    bg.BackgroundTransparency = 1
-    TweenService:Create(bg, tweenInfo, {Size = UDim2.new(0.65, 0, 0.78, 0)}):Play()
-    TweenService:Create(bg, tweenInfo, {Position = UDim2.new(0.175, 0, 0.11, 0)}):Play()
-    TweenService:Create(bg, tweenInfo, {BackgroundTransparency = 0}):Play()
-end
-
-local function toggleGUI()
-    isVisible = not isVisible
-    if isVisible then
-        bg.Visible = true
-        toggleBtn.Parent = titleBar
-        toggleBtn.Position = UDim2.new(1, -58, 0, 7)
-        TweenService:Create(bg, tweenInfo, {BackgroundTransparency = 0}):Play()
-        TweenService:Create(bg, tweenInfo, {Size = UDim2.new(0.65, 0, 0.78, 0)}):Play()
-        TweenService:Create(bg, tweenInfo, {Position = UDim2.new(0.175, 0, 0.11, 0)}):Play()
-    else
-        local hideTween = TweenService:Create(bg, tweenInfo, {
-            BackgroundTransparency = 1,
-            Size = UDim2.new(0.3, 0, 0.3, 0),
-            Position = UDim2.new(0.35, 0, 0.35, 0)
-        })
-        hideTween:Play()
-        hideTween.Completed:Once(function()
-            bg.Visible = false
-        end)
-        
-        toggleBtn.Parent = screenGui
-        TweenService:Create(toggleBtn, TweenInfo.new(0.35, Enum.EasingStyle.Quint), {
-            Position = UDim2.new(0.5, -23, 0.5, -23)
-        }):Play()
-    end
-end
-
-toggleBtn.MouseButton1Click:Connect(toggleGUI)
-
--- Dragging Code (unchanged)
-local function startDragging(obj)
-    obj.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = obj.Position
+Main:CreateToggle({ 
+    Name = "Auto Enter Dungeon", 
+    CurrentValue = false, 
+    Callback = function(state)
+        getgenv().AutoEnterDungeon = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoEnterDungeon do
+                    pcall(function() ReplicatedStorage:WaitForChild("DungeonEnterEvent"):FireServer("Solo") end)
+                    task.wait(6)
+                end
+            end)
         end
-    end)
+    end
+})
+
+Main:CreateToggle({ 
+    Name = "Auto Kill Dungeon NPCs", 
+    CurrentValue = false, 
+    Callback = function(state)
+        getgenv().AutoKillDungeon = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoKillDungeon do
+                    pcall(function()
+                        for i = 1, 8 do
+                            ReplicatedStorage:WaitForChild("DungeonPunchEvent"):FireServer("DungeonNPC_" .. i)
+                            task.wait(0.07)
+                        end
+                    end)
+                    task.wait(0.12)
+                end
+            end)
+        end
+    end
+})
+
+Main:CreateToggle({ 
+    Name = "Auto Kill Dungeon Boss", 
+    CurrentValue = false, 
+    Callback = function(state)
+        getgenv().AutoKillBoss = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoKillBoss do
+                    pcall(function()
+                        ReplicatedStorage:WaitForChild("DungeonPunchEvent"):FireServer("DungeonBoss")
+                    end)
+                    task.wait(0.15) -- Slightly slower for boss
+                end
+            end)
+        end
+    end
+})
+
+-- Manual Buttons
+Main:CreateButton({ 
+    Name = "🔥 Kill All Dungeon NPCs (Manual)", 
+    Callback = function()
+        for i = 1, 8 do
+            pcall(function()
+                ReplicatedStorage:WaitForChild("DungeonPunchEvent"):FireServer("DungeonNPC_"..i)
+            end)
+        end
+        Luna:Notification({Title = "Dungeon", Content = "Killing all 8 NPCs", Duration = 2})
+    end
+})
+
+Main:CreateButton({ 
+    Name = "👑 Kill Dungeon Boss (Manual)", 
+    Callback = function()
+        pcall(function()
+            ReplicatedStorage:WaitForChild("DungeonPunchEvent"):FireServer("DungeonBoss")
+        end)
+        Luna:Notification({Title = "Dungeon", Content = "Attacking Dungeon Boss", Duration = 2})
+    end
+})
+
+-- ====================== TELEPORT ======================
+Tele:CreateSection("Locations")
+
+local function TP(name, remote)
+    Tele:CreateButton({ Name = name, Callback = function()
+        pcall(function() ReplicatedStorage:WaitForChild(remote):FireServer("teleport") end)
+        Luna:Notification({Title = "Teleported", Content = name, Duration = 2})
+    end})
 end
 
-startDragging(titleBar)
-startDragging(toggleBtn)
+TP("Inferno Island", "InfernoIslandTeleport")
+TP("Nature Island", "NatureIslandTeleport")
+TP("Frost Island", "FrostIslandTeleport")
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        local target = isVisible and bg or toggleBtn
-        target.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+Tele:CreateButton({ Name = "Spawn", Callback = function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 5, 0)
+    end
+end})
+
+-- ====================== BOOSTS ======================
+Boost:CreateSection("Protein Boosts")
+
+local function Buy(name, args)
+    Boost:CreateButton({ Name = name, Callback = function()
+        pcall(function() ReplicatedStorage:WaitForChild("BuyBoostEvent"):FireServer(unpack(args)) end)
+        Luna:Notification({Title = "Boost Bought", Content = name, Duration = 2})
+    end})
+end
+
+Buy("1.8x Strength - Atom Crunch", {"buy", "Atom Crunch", 1})
+Buy("1.25x Shield - Chocolate Bar", {"buy", "Chocolate Bar 2", 1})
+Buy("1.2x Shield - Chocolate Bar", {"buy", "Chocolate Bar 1", 1})
+
+-- ====================== MISC ======================
+Misc:CreateSection("Utilities")
+
+local AntiAFK = false
+Misc:CreateToggle({ Name = "Anti-AFK", CurrentValue = false, Callback = function(s) AntiAFK = s end})
+Misc:CreateButton({ Name = "Destroy GUI", Callback = function() Luna:Destroy() end})
+
+LocalPlayer.Idled:Connect(function()
+    if AntiAFK then
+        VirtualUser:Button2Down(Vector2.new(), workspace.CurrentCamera.CFrame)
+        task.wait(0.1)
+        VirtualUser:Button2Up(Vector2.new(), workspace.CurrentCamera.CFrame)
     end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
-end)
-
-playIntroAnimation()
-print("✅ KensHub Private Script Loaded Successfully!")
+print("✅ KensHub PG CLAN Loaded! | " .. DisplayName)
